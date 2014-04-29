@@ -1,0 +1,103 @@
+Test cases for Intel SSE convolutional decoding. Bit error and frame
+error tests with Gaussian noise and multi-threaded benchmarks are
+provided. Uses libosmocore API.
+
+http://bb.osmocom.org/trac/wiki/libosmocore
+
+The following codes are available.
+
+Code  0:  Test all codes
+Code  1:  GSM xCCH           (N=2, K=5, non-recursive, flushed, not punctured)
+Code  2:  GPRS CS2           (N=2, K=5, non-recursive, flushed, not punctured)
+Code  3:  GPRS CS3           (N=2, K=5, non-recursive, flushed, not punctured)
+Code  4:  GSM RACH           (N=2, K=5, non-recursive, flushed, not punctured)
+Code  5:  GSM TCH/FR         (N=2, K=5, non-recursive, flushed, not punctured)
+Code  6:  GSM TCH/AFS 12.2   (N=2, K=5, recursive, flushed, punctured)
+Code  7:  GSM TCH/AFS 10.2   (N=3, K=5, recursive, flushed, punctured)
+Code  8:  GSM TCH/AFS 7.95   (N=3, K=7, recursive, flushed, punctured)
+Code  9:  GSM TCH/AFS 7.4    (N=3, K=5, recursive, flushed, punctured)
+Code 10:  GSM TCH/AFS 6.7    (N=4, K=5, recursive, flushed, punctured)
+Code 11:  GSM TCH/AFS 5.9    (N=4, K=7, recursive, flushed, punctured)
+Code 12:  GSM TCH/AHS 7.95   (N=2, K=5, recursive, flushed, punctured)
+Code 13:  GSM TCH/AHS 7.4    (N=2, K=5, recursive, flushed, punctured)
+Code 14:  GSM TCH/AHS 6.7    (N=2, K=5, recursive, flushed, punctured)
+Code 15:  GSM TCH/AHS 5.9    (N=2, K=5, recursive, flushed, punctured)
+Code 16:  GSM TCH/AHS 5.15   (N=3, K=5, recursive, flushed, punctured)
+Code 17:  GSM TCH/AHS 4.75   (N=3, K=7, recursive, flushed, punctured)
+Code 18:  WiMax FCH          (N=2, K=7, non-recursive, tail-biting)
+Code 19:  GMR-1 TCH3 Speech  (N=2, K=7, non-recursive, tail-biting)
+Code 20:  LTE PBCH           (N=3, K=7, non-recursive, tail-biting)
+Code 21:  Random Code        (N=2, K=5, non-recursive, truncated)
+
+
+Build
+=======
+$ autoreconf -i
+$ ./configure
+$ make
+$ make check
+
+
+Syntax
+=======
+
+$ ./conv_test -h
+Options:
+  -h    This text
+  -i    Number of iterations
+  -j    Number of threads for benchmark (EXPERIMENTAL)
+  -a    Run all tests
+  -b    Run benchmark tests
+  -n    Run length checks
+  -e    Run bit error rate tests
+  -s    Skip baseline decoder
+  -r    Specify SNR in dB (default 8.0 dB)
+  -o    Run baseline decoder only
+  -c    Test specific code
+  -l    List supported codes
+
+
+Examples
+========
+
+Error test for GPRS CS2 with signal-to-noise ratio of 5 dB
+with 100000 bursts.
+
+$ ./conv_test -c 2 -e -r 5 -i 100000
+
+=================================================
+[+] Testing: GPRS CS2
+[.] Specs: (N=2, K=5, non-recursive, flushed, not punctured)
+[.] Input length  : ret = 290  exp = 290 -> OK
+[.] Output length : ret = 588  exp = 588 -> OK
+
+[.] BER tests:
+[..] Testing base:
+[..] Input BER.......................... 0.042443
+[..] Output BER......................... 0.000006
+[..] Output FER......................... 0.001350 (135)
+[..] Testing SIMD:
+[..] Input BER.......................... 0.042460
+[..] Output BER......................... 0.000005
+[..] Output FER......................... 0.001240 (124)
+
+Timed benchmark with 8 threads and 100000 bursts per thread.
+
+$ ./conv_test -b -c 10 -j 8 -i 100000
+
+=================================================
+[+] Testing: GSM TCH/AFS 6.7
+[.] Specs: (N=4, K=5, recursive, flushed, punctured)
+[.] Input length  : ret = 140  exp = 140 -> OK
+[.] Output length : ret = 448  exp = 448 -> OK
+
+[.] Performance benchmark:
+[..] Encoding / Decoding 800000 bursts on 8 thread(s):
+[..] Testing base:
+[..] Elapsed time....................... 4.320001 secs
+[..] Rate............................... 25.925920 Mbps
+[..] Testing SIMD:
+[..] Elapsed time....................... 0.458272 secs
+[..] Rate............................... 244.396341 Mbps
+[..] Speedup............................ 9.426718
+
